@@ -1,0 +1,43 @@
+CREATE TABLE Bank (
+id_bank int IDENTITY PRIMARY KEY NOT NULL, 
+name_bank VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Client (
+id_client int IDENTITY PRIMARY KEY NOT NULL,
+fio VARCHAR(100) NOT NULL,
+phone VARCHAR(15) NOT NULL UNIQUE,
+email  VARCHAR(50) NOT NULL,
+passport int NOT NULL UNIQUE,
+id_bank int NOT NULL,
+constraint id_bankClient_fk foreign key(id_bank) references Bank(id_bank)
+);
+
+CREATE TABLE Credit (
+id_credit int IDENTITY PRIMARY KEY NOT NULL, 
+interest_rate numeric(3,1) NOT NULL,
+limit int NOT NULL,
+id_bank int NOT NULL,
+constraint interest_rate_ch check(interest_rate>=0 AND interest_rate<=100),
+constraint id_bankcredit_fk foreign key(id_bank) references Bank(id_bank)
+);
+
+CREATE TABLE Offer (
+id_offer int IDENTITY PRIMARY KEY NOT NULL, 
+ñredit_amount int NOT NULL,
+id_client int NOT NULL,
+id_credit int NOT NULL,
+constraint id_clientOffer_fk foreign key(id_client) references Client(id_client),
+constraint id_creditOffer_fk foreign key(id_credit) references Credit(id_credit)
+);
+
+CREATE TABLE Payment (
+id_payment int IDENTITY PRIMARY KEY NOT NULL, 
+payment_date date NOT NULL,
+payment_amount int NOT NULL,
+amount_repayment_body int NOT NULL,
+amount_repayment_interest int NOT NULL,
+id_offer int NOT NULL,
+constraint id_offerPayment_fk foreign key(id_offer) references Offer(id_offer)
+);
+
