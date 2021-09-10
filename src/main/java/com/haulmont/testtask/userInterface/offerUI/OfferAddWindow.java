@@ -34,7 +34,10 @@ public class OfferAddWindow extends Window {
     private TextField monthlyPayment;
     private ComboBox<Credit> creditComboBox;
     private ComboBox<Client> clientComboBox;
-    private Button checkButton;
+    //private Button checkButton;
+    BeanValidationBinder<Offer> binder;
+    Binder<ValidBean> supBinder;
+
 
     public OfferAddWindow(AbstractDao<Offer> dao, ListDataProvider<Offer> listDataProvider) {
         offerListDataProvider = listDataProvider;
@@ -54,9 +57,6 @@ public class OfferAddWindow extends Window {
         monthlyPayment.setReadOnly(true);
         creditComboBox = new ComboBox<>("Credit");
         clientComboBox = new ComboBox<>("Client");
-        checkButton = new Button("Check sum credit");
-        checkButton.setWidthFull();
-        checkButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         setCaption("Offer");
         setModal(true);
         setWidth("500px");
@@ -81,7 +81,7 @@ public class OfferAddWindow extends Window {
         addLayout.addComponent(creditTerm);
         addLayout.addComponent(totalAmount);
         addLayout.addComponent(monthlyPayment);
-        addLayout.addComponents(checkButton, addButton(), cancelButton());
+        addLayout.addComponents(checkButton(), addButton(), cancelButton());
         return addLayout;
     }
 
@@ -89,7 +89,7 @@ public class OfferAddWindow extends Window {
         Button addButton = new Button("Generate credit");
         addButton.setWidthFull();
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        BeanValidationBinder<Offer> binder = new BeanValidationBinder<>(Offer.class);
+        binder = new BeanValidationBinder<>(Offer.class);
         try {
             binder.forField(creditAmount).withConverter(
                             new StringToIntegerConverter("Must enter a number"))
@@ -103,28 +103,11 @@ public class OfferAddWindow extends Window {
         binder.bind(clientComboBox, "fkClient");
         binder.bind(creditComboBox, "fkCredit");
 
-        Binder<ValidBean> supBinder = new BeanValidationBinder<>(ValidBean.class);
-        supBinder.forField(creditTerm).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(x -> 1 <= x && x <= 1000,
-                        "Limit is exceeded").bind(ValidBean::getCreditTerm, ValidBean::setCreditTerm);
-
-
-        checkButton.addClickListener(valueChangeEvent -> {
-            if (binder.isValid() && supBinder.isValid()) {
-                double stavka = creditComboBox.getSelectedItem().get().getInterestRate().doubleValue() / 1200;
-                double n = Double.parseDouble(creditTerm.getValue());
-                double k = stavka + stavka / (Math.pow(1 + stavka, n) - 1);
-                double sum = k * Double.parseDouble(creditAmount.getValue());
-                monthlyPayment.setValue(String.valueOf((int) sum));
-                totalAmount.setValue(String.valueOf((int) (sum * n)));
-            } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
-            }
-        });
-
         addButton.addClickListener(event -> {
-            if (binder.isValid() && supBinder.isValid() && !monthlyPayment.isEmpty()) {
+            if (binder.isValid() && supBinder.isValid()) {
+                if (monthlyPayment.isEmpty()) {
+                    checkButton().click();
+                }
                 double stavka = creditComboBox.getSelectedItem().get().getInterestRate().doubleValue() / 1200;
                 int p = Integer.parseInt(monthlyPayment.getValue());
                 int sN1 = Integer.parseInt(creditAmount.getValue());
@@ -142,7 +125,7 @@ public class OfferAddWindow extends Window {
                         sN1 = sN2;
                     }
                 } else {
-                    Notification.show("Warning!", "Enter correct data or click on green button.", Notification.Type.WARNING_MESSAGE);
+                    Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
                 }
                 offerListDataProvider.getItems().add(offer);
                 offerListDataProvider.refreshAll();
@@ -152,6 +135,32 @@ public class OfferAddWindow extends Window {
             }
         });
         return addButton;
+    }
+
+    private Button checkButton() {
+        Button checkButton = new Button("Check sum credit");
+        checkButton.setWidthFull();
+        checkButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+        supBinder = new BeanValidationBinder<>(ValidBean.class);
+        supBinder.forField(creditTerm).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(x -> 1 <= x && x <= 1000,
+                        "Limit is exceeded").bind(ValidBean::getCreditTerm, ValidBean::setCreditTerm);
+
+        checkButton.addClickListener(valueChangeEvent -> {
+            if (binder.isValid() && supBinder.isValid()) {
+                double stavka = creditComboBox.getSelectedItem().get().getInterestRate().doubleValue() / 1200;
+                double n = Double.parseDouble(creditTerm.getValue());
+                double k = stavka + stavka / (Math.pow(1 + stavka, n) - 1);
+                double sum = k * Double.parseDouble(creditAmount.getValue());
+                monthlyPayment.setValue(String.valueOf((int) sum));
+                totalAmount.setValue(String.valueOf((int) (sum * n)));
+            } else {
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+            }
+        });
+        return checkButton;
     }
 
     private Button cancelButton() {

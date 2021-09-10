@@ -42,6 +42,9 @@ public class PaymentAddWindow extends Window {
         amountRepaymentBody.setSizeFull();
         amountRepaymentInterest.setSizeFull();
         offerComboBox = new ComboBox<>("Offer");
+
+        setWidth("400px");
+        setHeight("650px");
         setCaption("Add");
         setModal(true);
         setResizable(false);
@@ -52,8 +55,7 @@ public class PaymentAddWindow extends Window {
     private VerticalLayout addLayout() {
         VerticalLayout addLayout = new VerticalLayout();
         addLayout.setWidthFull();
-        setWidth("400px");
-        setHeight("650px");
+
         offerComboBox.setItems(offerDao.selectAll());
         offerComboBox.setItemCaptionGenerator(Offer::toString);
         offerComboBox.setSizeFull();
