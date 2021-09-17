@@ -6,6 +6,7 @@ import com.haulmont.testtask.userInterface.clientUI.ClientUI;
 import com.haulmont.testtask.userInterface.creditUI.CreditUI;
 import com.haulmont.testtask.userInterface.offerUI.OfferUI;
 import com.vaadin.annotations.Theme;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
@@ -19,6 +20,10 @@ import java.util.Locale;
 public class MainUI extends UI {
     private VerticalLayout mainLayout;
     private VerticalLayout tabMainLayout;
+    ClientUI clientUI;
+    BankUI bankUI;
+    CreditUI creditUI;
+    OfferUI offerUI;
 
     @Override
     protected void init(VaadinRequest request) {
@@ -48,12 +53,16 @@ public class MainUI extends UI {
         TabSheet tabsheet = new TabSheet();
         mainLayout.addComponent(tabsheet);
         mainLayout.setComponentAlignment(tabsheet, Alignment.BOTTOM_CENTER);
+        clientUI = new ClientUI(new ClientDao());
+        bankUI = new BankUI(new BankDao());
+        creditUI = new CreditUI(new CreditDao());
+        offerUI = new OfferUI(new OfferDao());
+
         tabsheet.addTab(tabMainLayout, "Home page");
-        tabsheet.addTab(new BankUI(new BankDao()), "Banks");
-        tabsheet.addTab(new ClientUI(new ClientDao()), "Clients");
-        tabsheet.addTab(new CreditUI(new CreditDao()), "Credits");
-        tabsheet.addTab(new OfferUI(new OfferDao()), "Offers");
-        // tabsheet.addTab(new PaymentUI(new PaymentDao()), "Payments");
+        tabsheet.addTab(bankUI, "Banks");
+        tabsheet.addTab(clientUI, "Clients");
+        tabsheet.addTab(creditUI, "Credits");
+        tabsheet.addTab(offerUI, "Offers");
         tabsheet.setSizeFull();
     }
 

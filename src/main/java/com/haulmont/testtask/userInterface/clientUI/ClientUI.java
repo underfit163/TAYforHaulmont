@@ -25,6 +25,10 @@ public class ClientUI extends VerticalLayout {
         addDataToGrid();
     }
 
+    public ListDataProvider<Client> getClientListDataProvider() {
+        return clientListDataProvider;
+    }
+
     private void crudButtonLayout() {
         HorizontalLayout crudLayout = new HorizontalLayout();
         crudLayout.addComponents(addButton(), updateButton(), deleteButton());
