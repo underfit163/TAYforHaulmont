@@ -31,7 +31,7 @@ public class CreditDao extends AbstractDao<Credit> {
     @Override
     public List<Credit> selectAll() {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            return (List<Credit>) session.createQuery("From Credit c JOIN FETCH c.fkBank order by c.idCredit").list();
+            return session.createQuery("From Credit c JOIN FETCH c.fkBank order by c.idCredit",Credit.class).list();
         }
     }
 

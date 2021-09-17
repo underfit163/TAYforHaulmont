@@ -65,7 +65,8 @@ public class CreditUI extends VerticalLayout {
                 getUI().addWindow(new CreditUpdateWindow(creditDao, creditListDataProvider, credit));
             } else {
                 Notification.show("Warning!",
-                        "Select credit for update!", Notification.Type.WARNING_MESSAGE);
+                        "Select credit for update!", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         button.addStyleNames(ValoTheme.BUTTON_FRIENDLY);
@@ -87,12 +88,13 @@ public class CreditUI extends VerticalLayout {
                         creditListDataProvider.getItems().remove(credit);
                         creditListDataProvider.refreshAll();
                     } else Notification.show("Warning!", "Can't remove credit which relevant with offers!",
-                            Notification.Type.WARNING_MESSAGE);
+                            Notification.Type.WARNING_MESSAGE).setStyleName(ValoTheme.NOTIFICATION_DARK);
                 } catch (Exception e) {
                     Notification.show("Error: " + e, Notification.Type.ERROR_MESSAGE);
                 }
             } else Notification.show("Warning!",
-                    "Select credit.", Notification.Type.WARNING_MESSAGE);
+                    "Select credit.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         button.addStyleName(ValoTheme.BUTTON_DANGER);
         return button;

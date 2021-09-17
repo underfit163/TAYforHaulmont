@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.Range;
 
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class Credit {
     @Column(name = "interestRate", nullable = false)
     private BigDecimal interestRate;
     @NotNull
+    @Min(0)
     @Column(name = "limit", nullable = false)
     private int limit;
     @NotNull
@@ -84,6 +86,7 @@ public class Credit {
     @Override
     public String toString() {
         return "Interest Rate = " + interestRate +
-                "| Limit = " + limit;
+                "| Limit = " + limit +
+                "| Bank = " + fkBank;
     }
 }

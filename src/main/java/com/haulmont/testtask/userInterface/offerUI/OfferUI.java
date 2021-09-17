@@ -63,7 +63,8 @@ public class OfferUI extends VerticalLayout {
                 getUI().addWindow(new OfferUpdateWindow(offerDao, offerListDataProvider, offer));
             } else {
                 Notification.show("Warning!",
-                        "Select offer for update!", Notification.Type.WARNING_MESSAGE);
+                        "Select offer for update!", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         button.addStyleNames(ValoTheme.BUTTON_FRIENDLY);
@@ -86,7 +87,8 @@ public class OfferUI extends VerticalLayout {
                     Notification.show("Error: " + e, Notification.Type.ERROR_MESSAGE);
                 }
             } else Notification.show("Warning!",
-                    "Select offer.", Notification.Type.WARNING_MESSAGE);
+                    "Select offer.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         button.addStyleName(ValoTheme.BUTTON_DANGER);
         return button;
@@ -103,7 +105,8 @@ public class OfferUI extends VerticalLayout {
             if (offer != null) {
                 getUI().addWindow(new PaymentUI(offer));
             } else Notification.show("Warning!",
-                    "Select offer.", Notification.Type.WARNING_MESSAGE);
+                    "Select offer.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         return button;
     }

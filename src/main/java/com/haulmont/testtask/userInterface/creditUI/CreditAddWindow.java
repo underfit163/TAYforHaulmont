@@ -59,6 +59,23 @@ public class CreditAddWindow extends Window {
         Button addButton = new Button("Add");
         addButton.setWidthFull();
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        BeanValidationBinder<Credit> binder = getValidationBinder();
+        addButton.addClickListener(event -> {
+            if (binder.isValid()) {
+                Credit credit = new Credit(new BigDecimal(interestRate.getValue()), Integer.parseInt(limit.getValue()), bankComboBox.getValue());
+                creditDao.save(credit);
+                creditListDataProvider.getItems().add(credit);
+                creditListDataProvider.refreshAll();
+                close();
+            } else {
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
+            }
+        });
+        return addButton;
+    }
+
+    private BeanValidationBinder<Credit> getValidationBinder() {
         BeanValidationBinder<Credit> binder = new BeanValidationBinder<>(Credit.class);
         binder.forField(interestRate).withConverter(
                         new StringToBigDecimalConverter("Must enter a number"))
@@ -69,18 +86,7 @@ public class CreditAddWindow extends Window {
                 .withValidator(new BeanValidator(Credit.class, "limit"))
                 .bind("limit");
         binder.bind(bankComboBox, "fkBank");
-        addButton.addClickListener(event -> {
-            if (binder.isValid()) {
-                Credit credit = new Credit(new BigDecimal(interestRate.getValue()), Integer.parseInt(limit.getValue()), bankComboBox.getValue());
-                creditDao.save(credit);
-                creditListDataProvider.getItems().add(credit);
-                creditListDataProvider.refreshAll();
-                close();
-            } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
-            }
-        });
-        return addButton;
+        return binder;
     }
 
     private Button cancelButton() {

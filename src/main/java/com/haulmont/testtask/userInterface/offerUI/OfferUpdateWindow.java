@@ -66,20 +66,7 @@ public class OfferUpdateWindow extends Window {
         Button updateButton = new Button("Update");
         updateButton.setWidthFull();
         updateButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        BeanValidationBinder<Offer> binder = new BeanValidationBinder<>(Offer.class);
-        try {
-            binder.forField(creditAmount).withConverter(
-                            new StringToIntegerConverter("Must enter a number"))
-                    .withValidator(new BeanValidator(Offer.class, "creditAmount"))
-                    .withValidator(x -> x <= creditComboBox.getSelectedItem().get().getLimit(),
-                            "Limit is exceeded")
-                    .bind("creditAmount");
-        } catch (NoSuchElementException e) {
-            Notification.show("Error!", "Item not found.", Notification.Type.ERROR_MESSAGE);
-        }
-        binder.bind(clientComboBox, "fkClient");
-        binder.bind(creditComboBox, "fkCredit");
-        binder.readBean(offer);
+        BeanValidationBinder<Offer> binder = getValidationBinder();
 
         updateButton.addClickListener(event -> {
             if (binder.isValid()) {
@@ -94,10 +81,29 @@ public class OfferUpdateWindow extends Window {
                 }
 
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return updateButton;
+    }
+
+    private BeanValidationBinder<Offer> getValidationBinder() {
+        BeanValidationBinder<Offer> binder = new BeanValidationBinder<>(Offer.class);
+        try {
+            binder.forField(creditAmount).withConverter(
+                            new StringToIntegerConverter("Must enter a number"))
+                    .withValidator(new BeanValidator(Offer.class, "creditAmount"))
+                    .withValidator(x -> x <= creditComboBox.getValue().getLimit(),
+                            "Limit is exceeded")
+                    .bind("creditAmount");
+        } catch (NoSuchElementException e) {
+            Notification.show("Error!", "Item not found.", Notification.Type.ERROR_MESSAGE);
+        }
+        binder.bind(clientComboBox, "fkClient");
+        binder.bind(creditComboBox, "fkCredit");
+        binder.readBean(offer);
+        return binder;
     }
 
     private Button cancelButton() {

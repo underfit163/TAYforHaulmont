@@ -59,6 +59,29 @@ public class CreditUpdateWindow extends Window {
         Button updateButton = new Button("Update");
         updateButton.setWidthFull();
         updateButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+        BeanValidationBinder<Credit> binder = getValidationBinder();
+
+        updateButton.addClickListener(event -> {
+            if (binder.isValid()) {
+                try {
+                    binder.writeBean(credit);
+                    creditDao.update(credit);
+                    listDataProvider.refreshItem(credit);
+                    close();
+                } catch (ValidationException e) {
+                    Notification.show("Validation error count: "
+                            + e.getValidationErrors().size()).setStyleName(ValoTheme.NOTIFICATION_DARK);
+                }
+
+            } else {
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
+            }
+        });
+        return updateButton;
+    }
+
+    private BeanValidationBinder<Credit> getValidationBinder() {
         BeanValidationBinder<Credit> binder = new BeanValidationBinder<>(Credit.class);
         binder.forField(interestRate).withConverter(
                         new StringToBigDecimalConverter("Must enter a number"))
@@ -70,24 +93,7 @@ public class CreditUpdateWindow extends Window {
                 .bind("limit");
         binder.bind(bankComboBox, "fkBank");
         binder.readBean(credit);
-
-        updateButton.addClickListener(event -> {
-            if (binder.isValid()) {
-                try {
-                    binder.writeBean(credit);
-                    creditDao.update(credit);
-                    listDataProvider.refreshItem(credit);
-                    close();
-                } catch (ValidationException e) {
-                    Notification.show("Validation error count: "
-                            + e.getValidationErrors().size());
-                }
-
-            } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
-            }
-        });
-        return updateButton;
+        return binder;
     }
 
     private Button cancelButton() {

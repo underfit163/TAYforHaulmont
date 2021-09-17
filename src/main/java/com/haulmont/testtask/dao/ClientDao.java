@@ -32,7 +32,7 @@ public class ClientDao extends AbstractDao<Client> {
     @Override
     public List<Client> selectAll() {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            return (List<Client>) session.createQuery("From Client c JOIN FETCH c.fkBank order by c.idClient").list();
+            return session.createQuery("From Client c JOIN FETCH c.fkBank order by c.idClient",Client.class).list();
         }
     }
 

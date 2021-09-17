@@ -66,17 +66,7 @@ public class ClientUpdateWindow extends Window {
         Button updateButton = new Button("Update");
         updateButton.setWidthFull();
         updateButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        BeanValidationBinder<Client> binder = new BeanValidationBinder<>(Client.class);
-        binder.bind(nameClient, "fio");
-        binder.bind(phone, "phone");
-        binder.bind(email, "email");
-        binder.forField(passport).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Client.class, "passport"))
-                .bind("passport");
-        binder.bind(bankComboBox, "fkBank");
-
-        binder.readBean(client);
+        BeanValidationBinder<Client> binder = getValidationBinder();
 
         updateButton.addClickListener(event -> {
             if (binder.isValid()) {
@@ -87,14 +77,29 @@ public class ClientUpdateWindow extends Window {
                     close();
                 } catch (ValidationException e) {
                     Notification.show("Validation error count: "
-                            + e.getValidationErrors().size());
+                            + e.getValidationErrors().size()).setStyleName(ValoTheme.NOTIFICATION_DARK);
                 }
 
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return updateButton;
+    }
+
+    private BeanValidationBinder<Client> getValidationBinder() {
+        BeanValidationBinder<Client> binder = new BeanValidationBinder<>(Client.class);
+        binder.bind(nameClient, "fio");
+        binder.bind(phone, "phone");
+        binder.bind(email, "email");
+        binder.forField(passport).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Client.class, "passport"))
+                .bind("passport");
+        binder.bind(bankComboBox, "fkBank");
+        binder.readBean(client);
+        return binder;
     }
 
     private Button cancelButton() {

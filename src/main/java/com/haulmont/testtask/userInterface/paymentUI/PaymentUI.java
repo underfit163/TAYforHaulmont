@@ -63,7 +63,8 @@ public class PaymentUI extends Window {
                 getUI().addWindow(new PaymentUpdateWindow(paymentDao, dataProvider, payment));
             } else {
                 Notification.show("Warning!",
-                        "Select payment for update!", Notification.Type.WARNING_MESSAGE);
+                        "Select payment for update!", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         button.addStyleNames(ValoTheme.BUTTON_FRIENDLY);
@@ -87,7 +88,8 @@ public class PaymentUI extends Window {
                     Notification.show("Error: " + e, Notification.Type.ERROR_MESSAGE);
                 }
             } else Notification.show("Warning!",
-                    "Select payment.", Notification.Type.WARNING_MESSAGE);
+                    "Select payment.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         button.addStyleName(ValoTheme.BUTTON_DANGER);
         return button;

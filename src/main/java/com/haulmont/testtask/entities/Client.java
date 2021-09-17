@@ -109,6 +109,7 @@ public class Client {
     @Override
     public String toString() {
         return "Name client = " + fio +
-                "| Passport = " + passport;
+                "| Passport = " + passport +
+                "| Bank = " + fkBank;
     }
 }

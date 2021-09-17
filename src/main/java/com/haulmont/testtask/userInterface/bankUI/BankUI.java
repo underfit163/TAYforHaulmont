@@ -63,7 +63,8 @@ public class BankUI extends VerticalLayout {
                 getUI().addWindow(new BankUpdateWindow(bankDao, bankListDataProvider, bank));
             } else {
                 Notification.show("Warning!",
-                        "Select bank for update!", Notification.Type.WARNING_MESSAGE);
+                        "Select bank for update!", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         button.addStyleNames(ValoTheme.BUTTON_FRIENDLY);
@@ -85,12 +86,12 @@ public class BankUI extends VerticalLayout {
                         bankListDataProvider.getItems().remove(bank);
                         bankListDataProvider.refreshAll();
                     } else Notification.show("Warning!", "Can't remove bank which relevant with clients!",
-                            Notification.Type.WARNING_MESSAGE);
+                            Notification.Type.WARNING_MESSAGE).setStyleName(ValoTheme.NOTIFICATION_DARK);
                 } catch (Exception e) {
                     Notification.show("Error: " + e, Notification.Type.ERROR_MESSAGE);
                 }
             } else Notification.show("Warning!",
-                    "Select bank.", Notification.Type.WARNING_MESSAGE);
+                    "Select bank.", Notification.Type.WARNING_MESSAGE).setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         button.addStyleName(ValoTheme.BUTTON_DANGER);
         return button;

@@ -32,13 +32,13 @@ public class PaymentDao extends AbstractDao<Payment> {
     @Override
     public List<Payment> selectAll() {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            return (List<Payment>) session.createQuery("From Payment p join fetch p.fkOffer order by p.idPayment").list();
+            return session.createQuery("From Payment p join fetch p.fkOffer order by p.idPayment",Payment.class).list();
         }
     }
 
     public List<Payment> selectAllForOffer(Offer offer) {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            Query q = session.createQuery("From Payment p join fetch p.fkOffer where p.fkOffer = :idParam order by p.idPayment");
+            Query<Payment> q = session.createQuery("From Payment p join fetch p.fkOffer where p.fkOffer = :idParam order by p.idPayment",Payment.class);
             q.setParameter("idParam", offer);
             return q.list();
         }

@@ -1,6 +1,7 @@
 package com.haulmont.testtask.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idOffer;
     @NotNull
+    @Min(0)
     @Column(name = "creditAmount", nullable = false)
     private int creditAmount;
     @NotNull

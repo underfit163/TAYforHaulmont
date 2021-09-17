@@ -32,7 +32,8 @@ public class OfferDao extends AbstractDao<Offer> {
     @Override
     public List<Offer> selectAll() {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            return (List<Offer>) session.createQuery("From Offer o JOIN fetch o.fkClient JOIN fetch o.fkCredit order by o.idOffer").list();
+            return session.createQuery(
+                    "From Offer o JOIN fetch o.fkClient JOIN fetch o.fkCredit JOIN fetch o.fkCredit.fkBank JOIN fetch o.fkClient.fkBank order by o.idOffer",Offer.class).list();
         }
     }
 

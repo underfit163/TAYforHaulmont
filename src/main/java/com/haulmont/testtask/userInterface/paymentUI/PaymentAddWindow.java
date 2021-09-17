@@ -74,28 +74,8 @@ public class PaymentAddWindow extends Window {
         Button addButton = new Button("Add");
         addButton.setWidthFull();
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        BeanValidationBinder<Payment> binder = new BeanValidationBinder<>(Payment.class);
 
-        binder.forField(paymentDate).bind("paymentDate");
-        binder.forField(paymentAmount).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "paymentAmount"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("paymentAmount");
-        binder.forField(amountRepaymentBody).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "amountRepaymentBody"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("amountRepaymentBody");
-        binder.forField(amountRepaymentInterest).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "amountRepaymentInterest"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("amountRepaymentInterest");
-        binder.bind(offerComboBox, "fkOffer");
+        BeanValidationBinder<Payment> binder = getValidationBinder();
 
         addButton.addClickListener(event -> {
             if (binder.isValid()) {
@@ -108,10 +88,37 @@ public class PaymentAddWindow extends Window {
                 paymentListDataProvider.refreshAll();
                 close();
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return addButton;
+    }
+
+    private BeanValidationBinder<Payment> getValidationBinder() {
+        BeanValidationBinder<Payment> binder = new BeanValidationBinder<>(Payment.class);
+
+        binder.forField(paymentDate).bind("paymentDate");
+        binder.forField(paymentAmount).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "paymentAmount"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("paymentAmount");
+        binder.forField(amountRepaymentBody).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "amountRepaymentBody"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("amountRepaymentBody");
+        binder.forField(amountRepaymentInterest).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "amountRepaymentInterest"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("amountRepaymentInterest");
+        binder.bind(offerComboBox, "fkOffer");
+        return binder;
     }
 
     private Button cancelButton() {

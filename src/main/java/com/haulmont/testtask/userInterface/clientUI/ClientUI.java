@@ -63,7 +63,8 @@ public class ClientUI extends VerticalLayout {
                 getUI().addWindow(new ClientUpdateWindow(clientDao, clientListDataProvider, client));
             } else {
                 Notification.show("Warning!",
-                        "Select client for update!", Notification.Type.WARNING_MESSAGE);
+                        "Select client for update!", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         button.addStyleNames(ValoTheme.BUTTON_FRIENDLY);
@@ -80,17 +81,19 @@ public class ClientUI extends VerticalLayout {
             if (client != null) {
                 try {
                     Client finalClient = client;
-                    if (offerDao.selectAll().stream().noneMatch(x -> x.getFkClient().getIdClient() == finalClient.getIdClient())) {
+                    if (offerDao.selectAll().stream().noneMatch(x -> x.getFkClient().getIdClient()
+                            == finalClient.getIdClient())) {
                         clientDao.delete(client);
                         clientListDataProvider.getItems().remove(client);
                         clientListDataProvider.refreshAll();
                     } else Notification.show("Warning!", "Can't remove client which relevant with offers!",
-                            Notification.Type.WARNING_MESSAGE);
+                            Notification.Type.WARNING_MESSAGE).setStyleName(ValoTheme.NOTIFICATION_DARK);
                 } catch (Exception e) {
                     Notification.show("Error: " + e, Notification.Type.ERROR_MESSAGE);
                 }
             } else Notification.show("Warning!",
-                    "Select client.", Notification.Type.WARNING_MESSAGE);
+                    "Select client.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
         });
         button.addStyleName(ValoTheme.BUTTON_DANGER);
         return button;

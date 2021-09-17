@@ -63,15 +63,7 @@ public class ClientAddWindow extends Window {
         Button addButton = new Button("Add");
         addButton.setWidthFull();
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        BeanValidationBinder<Client> binder = new BeanValidationBinder<>(Client.class);
-        binder.bind(nameClient, "fio");
-        binder.bind(phone, "phone");
-        binder.bind(email, "email");
-        binder.forField(passport).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Client.class, "passport"))
-                .bind("passport");
-        binder.bind(bankComboBox, "fkBank");
+        BeanValidationBinder<Client> binder = getValidationBinder();
 
         addButton.addClickListener(event -> {
             if (binder.isValid()) {
@@ -82,10 +74,24 @@ public class ClientAddWindow extends Window {
                 clientListDataProvider.refreshAll();
                 close();
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return addButton;
+    }
+
+    private BeanValidationBinder<Client> getValidationBinder() {
+        BeanValidationBinder<Client> binder = new BeanValidationBinder<>(Client.class);
+        binder.bind(nameClient, "fio");
+        binder.bind(phone, "phone");
+        binder.bind(email, "email");
+        binder.forField(passport).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Client.class, "passport"))
+                .bind("passport");
+        binder.bind(bankComboBox, "fkBank");
+        return binder;
     }
 
     private Button cancelButton() {

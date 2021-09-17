@@ -30,7 +30,7 @@ public class BankDao extends AbstractDao<Bank> {
     @Override
     public List<Bank> selectAll() {
         try (Session session = HibernateSessionFactory.getSessionFactory().openSession()) {
-            return (List<Bank>) session.createQuery("From Bank order by idBank").list();
+            return session.createQuery("From Bank order by idBank",Bank.class).list();
         }
     }
 }

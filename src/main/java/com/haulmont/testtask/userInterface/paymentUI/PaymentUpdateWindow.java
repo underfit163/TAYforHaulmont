@@ -71,29 +71,7 @@ public class PaymentUpdateWindow extends Window {
         Button updateButton = new Button("Update");
         updateButton.setWidthFull();
         updateButton.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-        BeanValidationBinder<Payment> binder = new BeanValidationBinder<>(Payment.class);
-
-        binder.forField(paymentDate).bind("paymentDate");
-        binder.forField(paymentAmount).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "paymentAmount"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("paymentAmount");
-        binder.forField(amountRepaymentBody).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "amountRepaymentBody"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("amountRepaymentBody");
-        binder.forField(amountRepaymentInterest).withConverter(
-                        new StringToIntegerConverter("Must enter a number"))
-                .withValidator(new BeanValidator(Payment.class, "amountRepaymentInterest"))
-                .withValidator(x -> x <= offerComboBox.getSelectedItem().get().getCreditAmount(),
-                        "Limit is exceeded")
-                .bind("amountRepaymentInterest");
-        binder.bind(offerComboBox, "fkOffer");
-        binder.readBean(payment);
+        BeanValidationBinder<Payment> binder = getPaymentBeanValidationBinder();
         updateButton.addClickListener(event -> {
             if (binder.isValid()) {
                 try {
@@ -103,14 +81,42 @@ public class PaymentUpdateWindow extends Window {
                     close();
                 } catch (ValidationException e) {
                     Notification.show("Validation error count: "
-                            + e.getValidationErrors().size());
+                            + e.getValidationErrors().size()).setStyleName(ValoTheme.NOTIFICATION_DARK);
                 }
 
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return updateButton;
+    }
+
+    private BeanValidationBinder<Payment> getPaymentBeanValidationBinder() {
+        BeanValidationBinder<Payment> binder = new BeanValidationBinder<>(Payment.class);
+
+        binder.forField(paymentDate).bind("paymentDate");
+        binder.forField(paymentAmount).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "paymentAmount"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("paymentAmount");
+        binder.forField(amountRepaymentBody).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "amountRepaymentBody"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("amountRepaymentBody");
+        binder.forField(amountRepaymentInterest).withConverter(
+                        new StringToIntegerConverter("Must enter a number"))
+                .withValidator(new BeanValidator(Payment.class, "amountRepaymentInterest"))
+                .withValidator(x -> x <= offerComboBox.getValue().getCreditAmount(),
+                        "Limit is exceeded")
+                .bind("amountRepaymentInterest");
+        binder.bind(offerComboBox, "fkOffer");
+        binder.readBean(payment);
+        return binder;
     }
 
     private Button cancelButton() {

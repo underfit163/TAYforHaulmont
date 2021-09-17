@@ -34,10 +34,9 @@ public class OfferAddWindow extends Window {
     private TextField monthlyPayment;
     private ComboBox<Credit> creditComboBox;
     private ComboBox<Client> clientComboBox;
-    //private Button checkButton;
+
     BeanValidationBinder<Offer> binder;
     Binder<ValidBean> supBinder;
-
 
     public OfferAddWindow(AbstractDao<Offer> dao, ListDataProvider<Offer> listDataProvider) {
         offerListDataProvider = listDataProvider;
@@ -59,7 +58,7 @@ public class OfferAddWindow extends Window {
         clientComboBox = new ComboBox<>("Client");
         setCaption("Offer");
         setModal(true);
-        setWidth("500px");
+        setWidth("700px");
         setHeightFull();
         setResizable(false);
         center();
@@ -89,12 +88,58 @@ public class OfferAddWindow extends Window {
         Button addButton = new Button("Generate credit");
         addButton.setWidthFull();
         addButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        validationAddOffer();
+
+        addButton.addClickListener(event -> {
+            if (binder.isValid() && supBinder.isValid()) {
+                if (monthlyPayment.isEmpty()) {
+                    checkButton().click();
+                }
+
+                checkClientInBank();
+
+                createOffer();
+                close();
+            } else {
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
+            }
+        });
+        return addButton;
+    }
+
+    private void createOffer() {
+        double bet = creditComboBox.getValue().getInterestRate().doubleValue() / 1200;
+        int mp = Integer.parseInt(monthlyPayment.getValue());
+        int creditSum = Integer.parseInt(creditAmount.getValue());
+        Offer offer = new Offer(Integer.parseInt(creditAmount.getValue()), clientComboBox.getValue(), creditComboBox.getValue());
+        offerDao.save(offer);
+        int aRInterest;
+        int aRBoby;
+        int newCreditSum;
+        if (supBinder.isValid()) {
+            for (int i = 0; i < Integer.parseInt(creditTerm.getValue()); i++) {
+                aRInterest = (int) (creditSum * bet); // расчет процентов, сумма для погашения процентов
+                aRBoby = mp - aRInterest;
+                paymentDao.save(new Payment(LocalDate.now().plusMonths(i), mp, aRBoby, aRInterest, offer));
+                newCreditSum = creditSum - aRBoby;
+                creditSum = newCreditSum;
+            }
+        } else {
+            Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                    .setStyleName(ValoTheme.NOTIFICATION_DARK);
+        }
+        offerListDataProvider.getItems().add(offer);
+        offerListDataProvider.refreshAll();
+    }
+
+    private void validationAddOffer() {
         binder = new BeanValidationBinder<>(Offer.class);
         try {
             binder.forField(creditAmount).withConverter(
                             new StringToIntegerConverter("Must enter a number"))
                     .withValidator(new BeanValidator(Offer.class, "creditAmount"))
-                    .withValidator(x -> x <= creditComboBox.getSelectedItem().get().getLimit(),
+                    .withValidator(x -> x <= creditComboBox.getValue().getLimit(),
                             "Limit is exceeded")
                     .bind("creditAmount");
         } catch (NoSuchElementException e) {
@@ -102,39 +147,20 @@ public class OfferAddWindow extends Window {
         }
         binder.bind(clientComboBox, "fkClient");
         binder.bind(creditComboBox, "fkCredit");
+    }
 
-        addButton.addClickListener(event -> {
-            if (binder.isValid() && supBinder.isValid()) {
-                if (monthlyPayment.isEmpty()) {
-                    checkButton().click();
-                }
-                double stavka = creditComboBox.getSelectedItem().get().getInterestRate().doubleValue() / 1200;
-                int p = Integer.parseInt(monthlyPayment.getValue());
-                int sN1 = Integer.parseInt(creditAmount.getValue());
-                Offer offer = new Offer(Integer.parseInt(creditAmount.getValue()), clientComboBox.getValue(), creditComboBox.getValue());
-                offerDao.save(offer);
-                int iN;
-                int s;
-                int sN2;
-                if (supBinder.isValid()) {
-                    for (int i = 0; i < Integer.parseInt(creditTerm.getValue()); i++) {
-                        iN = (int) (sN1 * stavka); // расчет процентов, сумма для погашения процентов
-                        s = p - iN;
-                        paymentDao.save(new Payment(LocalDate.now().plusMonths(i), p, s, iN, offer));
-                        sN2 = sN1 - s;
-                        sN1 = sN2;
-                    }
-                } else {
-                    Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
-                }
-                offerListDataProvider.getItems().add(offer);
-                offerListDataProvider.refreshAll();
-                close();
-            } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+    private void checkClientInBank() {
+        if (clientComboBox.getValue().getFkBank().getIdBank() !=
+                creditComboBox.getValue().getFkBank().getIdBank()) {
+            if (clientDao.selectAll().stream().noneMatch(x -> x.getFkBank().getIdBank() == creditComboBox.getValue().getFkBank().getIdBank() &&
+                    x.getPassport() == clientComboBox.getValue().getPassport())) {
+                Client client = new Client(clientComboBox.getValue().getFio(), clientComboBox.getValue().getPhone(),
+                        clientComboBox.getValue().getEmail(), clientComboBox.getValue().getPassport(), creditComboBox.getValue().getFkBank());
+                clientDao.save(client);
+                clientComboBox.setItems(client);
+                clientComboBox.setSelectedItem(client);
             }
-        });
-        return addButton;
+        }
     }
 
     private Button checkButton() {
@@ -150,14 +176,15 @@ public class OfferAddWindow extends Window {
 
         checkButton.addClickListener(valueChangeEvent -> {
             if (binder.isValid() && supBinder.isValid()) {
-                double stavka = creditComboBox.getSelectedItem().get().getInterestRate().doubleValue() / 1200;
+                double bet = creditComboBox.getValue().getInterestRate().doubleValue() / 1200;
                 double n = Double.parseDouble(creditTerm.getValue());
-                double k = stavka + stavka / (Math.pow(1 + stavka, n) - 1);
+                double k = bet + bet / (Math.pow(1 + bet, n) - 1);
                 double sum = k * Double.parseDouble(creditAmount.getValue());
                 monthlyPayment.setValue(String.valueOf((int) sum));
                 totalAmount.setValue(String.valueOf((int) (sum * n)));
             } else {
-                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE);
+                Notification.show("Warning!", "Enter correct data.", Notification.Type.WARNING_MESSAGE)
+                        .setStyleName(ValoTheme.NOTIFICATION_DARK);
             }
         });
         return checkButton;
